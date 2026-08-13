@@ -44,8 +44,8 @@ const english: Record<string, string> = {
     "This is the only opportunity to create the administrator. The Setup Token is shown in the backend startup logs.",
   管理员账号: "Administrator username",
   管理员密码: "Administrator password",
-  "至少 12 个字符，将使用 Argon2id 加密保存。":
-    "At least 12 characters. It will be stored using Argon2id.",
+  "至少 8 个字符，将使用 Argon2id 加密保存。":
+    "At least 8 characters. It will be stored using Argon2id.",
   创建管理员: "Create administrator",
   管理员创建成功: "Administrator created",
   欢迎回来: "Welcome back",
@@ -280,8 +280,8 @@ const english: Record<string, string> = {
   保存用户名: "Save username",
   用户名已更新: "Username updated",
   修改密码: "Change password",
-  "新密码至少 12 个字符，保存后会退出其他设备上的会话。":
-    "The new password must contain at least 12 characters. Other device sessions will be signed out.",
+  "新密码至少 8 个字符，保存后会退出其他设备上的会话。":
+    "The new password must contain at least 8 characters. Other device sessions will be signed out.",
   新密码: "New password",
   确认新密码: "Confirm new password",
   验证码或恢复码: "Verification or recovery code",

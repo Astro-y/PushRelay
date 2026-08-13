@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/crypto/argon2"
 )
@@ -75,8 +76,8 @@ func NormalizeRecoveryCode(code string) string {
 }
 
 func HashPassword(password string) (string, error) {
-	if len(password) < 12 {
-		return "", errors.New("password must contain at least 12 characters")
+	if utf8.RuneCountInString(password) < 8 {
+		return "", errors.New("password must contain at least 8 characters")
 	}
 	salt := make([]byte, 16)
 	if _, err := io.ReadFull(rand.Reader, salt); err != nil {

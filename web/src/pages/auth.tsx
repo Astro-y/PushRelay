@@ -114,9 +114,10 @@ export function SetupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
+                minLength={8}
               />
               <FieldDescription>
-                {t("至少 12 个字符，将使用 Argon2id 加密保存。")}
+                {t("至少 8 个字符，将使用 Argon2id 加密保存。")}
               </FieldDescription>
             </Field>
           </FieldGroup>
@@ -124,7 +125,9 @@ export function SetupPage() {
         <CardFooter>
           <Button
             className="w-full"
-            disabled={mutation.isPending || !token || password.length < 12}
+            disabled={
+              mutation.isPending || !token || Array.from(password).length < 8
+            }
             onClick={() => mutation.mutate()}
           >
             {mutation.isPending ? (

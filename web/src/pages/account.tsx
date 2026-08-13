@@ -247,7 +247,7 @@ function PasswordCard({ me }: { me: Me }) {
       <CardHeader>
         <CardTitle>{t("修改密码")}</CardTitle>
         <CardDescription>
-          {t("新密码至少 12 个字符，保存后会退出其他设备上的会话。")}
+          {t("新密码至少 8 个字符，保存后会退出其他设备上的会话。")}
         </CardDescription>
       </CardHeader>
       <CardFooter className="mt-auto">
@@ -271,7 +271,7 @@ function PasswordCard({ me }: { me: Me }) {
             <DialogHeader>
               <DialogTitle>{t("修改密码")}</DialogTitle>
               <DialogDescription>
-                {t("新密码至少 12 个字符，保存后会退出其他设备上的会话。")}
+                {t("新密码至少 8 个字符，保存后会退出其他设备上的会话。")}
               </DialogDescription>
             </DialogHeader>
             <FieldGroup>
@@ -295,6 +295,7 @@ function PasswordCard({ me }: { me: Me }) {
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
                   autoComplete="new-password"
+                  minLength={8}
                 />
               </Field>
               <Field
@@ -311,6 +312,7 @@ function PasswordCard({ me }: { me: Me }) {
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   autoComplete="new-password"
+                  minLength={8}
                   aria-invalid={Boolean(
                     confirmPassword && confirmPassword !== newPassword
                   )}
@@ -339,7 +341,7 @@ function PasswordCard({ me }: { me: Me }) {
                 disabled={
                   update.isPending ||
                   !currentPassword ||
-                  newPassword.length < 12 ||
+                  Array.from(newPassword).length < 8 ||
                   newPassword !== confirmPassword ||
                   (me.two_factor_enabled && !otp)
                 }

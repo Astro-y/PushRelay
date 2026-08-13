@@ -26,6 +26,18 @@ func TestPassword(t *testing.T) {
 	}
 }
 
+func TestPasswordMinimumLength(t *testing.T) {
+	if _, err := HashPassword("1234567"); err == nil {
+		t.Fatal("HashPassword() accepted a password shorter than 8 characters")
+	}
+	if _, err := HashPassword("一二三四五六七"); err == nil {
+		t.Fatal("HashPassword() counted UTF-8 bytes instead of characters")
+	}
+	if _, err := HashPassword("12345678"); err != nil {
+		t.Fatalf("HashPassword() rejected an 8-character password: %v", err)
+	}
+}
+
 func TestRecoveryCode(t *testing.T) {
 	code, err := RecoveryCode()
 	if err != nil {
