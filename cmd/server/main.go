@@ -12,6 +12,7 @@ import (
 
 	"pushrelay/internal/app"
 	"pushrelay/internal/config"
+	"pushrelay/internal/consoleui"
 	"pushrelay/internal/secure"
 	"pushrelay/internal/store"
 )
@@ -47,6 +48,9 @@ func main() {
 	if err != nil {
 		logger.Error("application error", "error", err)
 		os.Exit(1)
+	}
+	if setupToken, setupRequired := application.PendingSetupToken(); setupRequired {
+		consoleui.PrintSetupToken(os.Stderr, setupToken)
 	}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()

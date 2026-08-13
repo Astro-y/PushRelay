@@ -24,14 +24,15 @@ import (
 )
 
 type Server struct {
-	cfg        config.Config
-	store      *store.Store
-	vault      *secure.Vault
-	channels   *channels.Service
-	logger     *slog.Logger
-	router     chi.Router
-	setupToken string
-	settings   atomic.Value
+	cfg           config.Config
+	store         *store.Store
+	vault         *secure.Vault
+	channels      *channels.Service
+	logger        *slog.Logger
+	router        chi.Router
+	setupToken    string
+	setupRequired bool
+	settings      atomic.Value
 }
 type authInfo struct{ AdminID, Username, CSRF, SessionHash string }
 type contextKey string
@@ -58,12 +59,20 @@ func New(cfg config.Config, st *store.Store, vault *secure.Vault, logger *slog.L
 		return nil, err
 	}
 	if !has {
-		logger.Warn("administrator setup is required", "setup_token", token)
+		s.setupRequired = true
+		logger.Warn("administrator setup is required")
 	}
 	s.router = s.routes()
 	return s, nil
 }
 func (s *Server) Router() http.Handler { return s.router }
+
+func (s *Server) PendingSetupToken() (string, bool) {
+	if !s.setupRequired {
+		return "", false
+	}
+	return s.setupToken, true
+}
 
 func (s *Server) currentSettings() store.RuntimeSettings {
 	return s.settings.Load().(store.RuntimeSettings)
