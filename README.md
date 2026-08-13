@@ -158,7 +158,7 @@ docker compose down                # 停止并移除容器，不会删除 pushre
 <details>
 <summary><strong>展开 Linux 原生部署步骤</strong></summary>
 
-需要提前安装 Go 1.25、Node.js 20、pnpm 和 Git。
+需要提前安装 Go 1.25、Node.js 22.13 或更高版本、pnpm 和 Git。
 
 #### 1. 下载并配置
 
