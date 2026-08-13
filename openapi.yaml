@@ -1,0 +1,236 @@
+openapi: 3.1.0
+info:
+  title: PushRelay API
+  version: 1.0.0
+  description: 单管理员、自托管的 Webhook 中转与定时通知平台。
+servers:
+  - url: http://localhost:4426
+paths:
+  /healthz:
+    get:
+      operationId: health
+      responses:
+        "200": { description: Healthy }
+  /hooks/{token}:
+    parameters:
+      - in: path
+        name: token
+        required: true
+        schema: { type: string }
+    post:
+      operationId: acceptWebhook
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema: { type: string, maxLength: 255 }
+        - in: header
+          name: X-Push-Timestamp
+          schema: { type: string }
+        - in: header
+          name: X-Push-Signature
+          schema: { type: string, pattern: '^sha256=[0-9a-f]{64}$' }
+      requestBody:
+        content:
+          application/json: { schema: {} }
+          application/x-www-form-urlencoded: { schema: { type: object } }
+          text/plain: { schema: { type: string } }
+      responses:
+        "202":
+          description: Event persisted and accepted for asynchronous delivery.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AcceptedEvent' }
+        "400": { $ref: '#/components/responses/Error' }
+        "401": { $ref: '#/components/responses/Error' }
+        "404": { $ref: '#/components/responses/Error' }
+  /api/v1/setup/status:
+    get:
+      operationId: setupStatus
+      responses:
+        "200": { description: Setup status }
+  /api/v1/setup:
+    post:
+      operationId: setup
+      parameters:
+        - in: header
+          name: X-Setup-Token
+          required: true
+          schema: { type: string }
+      responses:
+        "201": { description: Administrator created }
+        "403": { $ref: '#/components/responses/Error' }
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      responses:
+        "200": { description: Authenticated; session cookie is set }
+        "401": { $ref: '#/components/responses/Error' }
+  /api/v1/auth/pocketid/status:
+    get:
+      operationId: pocketIDStatus
+      responses:
+        "200": { description: Whether Pocket ID sign-in is available }
+  /api/v1/auth/pocketid/start:
+    get:
+      operationId: pocketIDStart
+      responses:
+        "302": { description: Redirect to Pocket ID authorization endpoint }
+        "503": { $ref: '#/components/responses/Error' }
+  /api/v1/auth/pocketid/callback:
+    get:
+      operationId: pocketIDCallback
+      responses:
+        "302": { description: Validate the OIDC response, create a session, and redirect to the console }
+  /api/v1/account/username:
+    put:
+      operationId: updateUsername
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200": { description: Username updated }
+        "401": { $ref: '#/components/responses/Error' }
+  /api/v1/account/password:
+    put:
+      operationId: updatePassword
+      security: [{ cookieAuth: [] }]
+      responses:
+        "204": { description: Password updated and other sessions revoked }
+        "401": { $ref: '#/components/responses/Error' }
+  /api/v1/account/2fa/setup:
+    post:
+      operationId: setupTwoFactor
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200": { description: Pending TOTP secret and QR code }
+  /api/v1/account/2fa/enable:
+    post:
+      operationId: enableTwoFactor
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200": { description: TOTP enabled with one-time recovery codes }
+  /api/v1/account/2fa/disable:
+    post:
+      operationId: disableTwoFactor
+      security: [{ cookieAuth: [] }]
+      responses:
+        "204": { description: TOTP disabled }
+  /api/v1/dashboard:
+    get:
+      operationId: dashboard
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200": { description: Aggregate counters }
+  /api/v1/channels:
+    get: { operationId: listChannels, security: [{ cookieAuth: [] }], responses: { "200": { description: Channels } } }
+    post: { operationId: createChannel, security: [{ cookieAuth: [] }], responses: { "201": { description: Created } } }
+  /api/v1/templates:
+    get: { operationId: listTemplates, security: [{ cookieAuth: [] }], responses: { "200": { description: Templates } } }
+    post: { operationId: createTemplate, security: [{ cookieAuth: [] }], responses: { "201": { description: Created } } }
+  /api/v1/target-groups:
+    get: { operationId: listTargetGroups, security: [{ cookieAuth: [] }], responses: { "200": { description: Target groups } } }
+    post: { operationId: createTargetGroup, security: [{ cookieAuth: [] }], responses: { "201": { description: Created } } }
+  /api/v1/sources:
+    get: { operationId: listSources, security: [{ cookieAuth: [] }], responses: { "200": { description: Webhook sources } } }
+    post: { operationId: createSource, security: [{ cookieAuth: [] }], responses: { "201": { description: Created with one-time credentials } } }
+  /api/v1/rules:
+    get: { operationId: listRules, security: [{ cookieAuth: [] }], responses: { "200": { description: Rules } } }
+    post: { operationId: createRule, security: [{ cookieAuth: [] }], responses: { "201": { description: Created } } }
+  /api/v1/schedules:
+    get: { operationId: listSchedules, security: [{ cookieAuth: [] }], responses: { "200": { description: Schedules } } }
+    post: { operationId: createSchedule, security: [{ cookieAuth: [] }], responses: { "201": { description: Created } } }
+  /api/v1/events:
+    get: { operationId: listEvents, security: [{ cookieAuth: [] }], responses: { "200": { description: Events } } }
+  /api/v1/deliveries:
+    get: { operationId: listDeliveries, security: [{ cookieAuth: [] }], responses: { "200": { description: Deliveries } } }
+  /api/v1/settings:
+    get:
+      operationId: getSettings
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Runtime settings
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RuntimeSettings' }
+    put:
+      operationId: updateSettings
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RuntimeSettings' }
+      responses:
+        "200":
+          description: Settings persisted and applied without restarting
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RuntimeSettings' }
+        "400": { $ref: '#/components/responses/Error' }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: pushrelay_session
+  schemas:
+    AcceptedEvent:
+      type: object
+      required: [event_id, status, duplicate, matched_rules]
+      properties:
+        event_id: { type: string }
+        status: { type: string, const: accepted }
+        duplicate: { type: boolean }
+        matched_rules: { type: integer }
+    RuntimeSettings:
+      type: object
+      additionalProperties: false
+      required: [default_timezone, payload_retention_days, metadata_retention_days, allow_private_webhook_targets, pocketid_enabled, pocketid_issuer_url, pocketid_client_id, pocketid_client_secret_configured, pocketid_allowed_identity]
+      properties:
+        default_timezone:
+          type: string
+          examples: [Asia/Shanghai]
+        payload_retention_days:
+          type: integer
+          minimum: 0
+          maximum: 3650
+          default: 7
+        metadata_retention_days:
+          type: integer
+          minimum: 1
+          maximum: 3650
+          default: 30
+        allow_private_webhook_targets:
+          type: boolean
+          default: false
+        pocketid_enabled:
+          type: boolean
+          default: false
+        pocketid_issuer_url:
+          type: string
+        pocketid_client_id:
+          type: string
+        pocketid_client_secret_configured:
+          type: boolean
+          readOnly: true
+        pocketid_client_secret:
+          type: string
+          writeOnly: true
+        pocketid_clear_client_secret:
+          type: boolean
+          writeOnly: true
+        pocketid_allowed_identity:
+          type: string
+    Error:
+      type: object
+      required: [code, message, request_id]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: {}
+        request_id: { type: string }
+  responses:
+    Error:
+      description: Error response
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

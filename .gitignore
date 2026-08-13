@@ -1,0 +1,53 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime data
+data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Go build and test output
+bin/
+pushrelay
+pushrelay.exe
+*.test
+*.out
+coverage.out
+coverage/
+
+# Frontend dependencies and build output
+web/node_modules/
+web/dist/
+web/.vite/
+*.tsbuildinfo
+
+# Production UI files copied before go build
+internal/webui/dist/*
+!internal/webui/dist/.keep
+
+# End-to-end test output
+playwright-report/
+test-results/
+blob-report/
+
+# Tool caches and temporary files
+.cache/
+.tmp/
+tmp/
+*.log
+pnpm-debug.log*
+npm-debug.log*
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini

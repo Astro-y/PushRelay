@@ -1,0 +1,17 @@
+services:
+  pushrelay:
+    image: ghcr.io/astro-y/pushrelay:latest
+    container_name: pushrelay
+    restart: unless-stopped
+    environment:
+      HTTP_ADDR: :4426
+      DATABASE_PATH: /data/pushrelay.db
+      WEB_ORIGIN: http://localhost:4426
+      APP_ENCRYPTION_KEY: REPLACE_WITH_32_BYTE_BASE64_KEY
+    volumes:
+      - pushrelay-data:/data
+    ports:
+      - "127.0.0.1:4426:4426"
+
+volumes:
+  pushrelay-data:
