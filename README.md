@@ -76,13 +76,13 @@ PushRelay 接收统一 Webhook，根据安全、可视化的规则匹配事件�
 
 ```mermaid
 flowchart LR
-    A[Webhook / Schedule] --> B[Event]
-    B --> C{Routing rules}
-    C --> D[Target group]
-    D --> E[Channel + Template]
-    E --> F[Persistent queue]
-    F --> G[WeCom / Feishu / Telegram / ...]
-    F --> H[Retry / Dead letter / Logs]
+    A["Webhook / Schedule"] --> B["Event"]
+    B --> C{"Routing rules"}
+    C --> D["Target group"]
+    D --> E["Channel + Template"]
+    E --> F["Persistent queue"]
+    F --> G["WeCom / Feishu / Telegram / ..."]
+    F --> H["Retry / Dead letter / Logs"]
 ```
 
 <a id="deployment"></a>
