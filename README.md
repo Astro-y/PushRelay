@@ -74,16 +74,12 @@ PushRelay 接收统一 Webhook，根据安全、可视化的规则匹配事件�
 
 ## 工作方式
 
-```mermaid
-flowchart LR
-    A["Webhook / Schedule"] --> B["Event"]
-    B --> C{"Routing rules"}
-    C --> D["Target group"]
-    D --> E["Channel + Template"]
-    E --> F["Persistent queue"]
-    F --> G["WeCom / Feishu / Telegram / ..."]
-    F --> H["Retry / Dead letter / Logs"]
-```
+| ① 触发 | ② 路由与编排 | ③ 可靠投递 |
+| --- | --- | --- |
+| Webhook / 定时任务 | 事件 → 规则匹配 → 目标组 | 渠道 + 模板 → 持久队列 |
+
+- **发送成功**：投递到企业微信、飞书、Telegram 等目标渠道并记录结果。
+- **发送失败**：按退避策略自动重试，最终失败进入死信并保留完整日志。
 
 <a id="deployment"></a>
 
