@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -124,6 +125,33 @@ func requestBaseURL(r *http.Request) string {
 		host = r.Host
 	}
 	return scheme + "://" + host
+}
+
+func requestOriginAllowed(r *http.Request, configuredOrigin string) bool {
+	rawOrigin := strings.TrimSpace(r.Header.Get("Origin"))
+	if rawOrigin == "" {
+		return true
+	}
+	origin := normalizeOrigin(rawOrigin)
+	if origin == "" {
+		return false
+	}
+	parsedOrigin, err := url.Parse(origin)
+	if err == nil && strings.EqualFold(parsedOrigin.Host, strings.TrimSpace(r.Host)) {
+		return true
+	}
+	return origin == normalizeOrigin(configuredOrigin)
+}
+
+func normalizeOrigin(raw string) string {
+	parsed, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil || parsed.User != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return ""
+	}
+	if parsed.Path != "" && parsed.Path != "/" || parsed.RawQuery != "" || parsed.Fragment != "" {
+		return ""
+	}
+	return strings.ToLower(parsed.Scheme) + "://" + strings.ToLower(parsed.Host)
 }
 
 func subtleEqual(a, b string) bool {

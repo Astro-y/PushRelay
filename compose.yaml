@@ -6,7 +6,7 @@ services:
     environment:
       HTTP_ADDR: :4426
       DATABASE_PATH: /data/pushrelay.db
-      WEB_ORIGIN: http://localhost:4426
+      WEB_ORIGIN: https://push.example.com
       APP_ENCRYPTION_KEY: REPLACE_WITH_32_BYTE_BASE64_KEY
     volumes:
       - pushrelay-data:/data

@@ -127,6 +127,8 @@ docker compose logs -f pushrelay
 
 服务绑定宿主机 `127.0.0.1:4426`，SQLite 数据保存在 Docker 命名卷 `pushrelay-data`。首次启动日志会输出一次性 `setup_token`，打开访问地址并输入该 Token 即可创建管理员。
 
+使用域名访问时，请把 Compose 中的 `WEB_ORIGIN` 改为浏览器实际访问的完整地址，例如 `https://push.example.com`。Pocket ID 登录完成后会返回该地址。
+
 常用运维命令：
 
 ```bash
@@ -362,7 +364,7 @@ timestamp + "." + raw_body
 | `APP_ENCRYPTION_KEY` | 是 | 无 | 32 字节 Base64 或 64 位十六进制密钥 |
 | `HTTP_ADDR` | 否 | `:4426` | HTTP 监听地址 |
 | `DATABASE_PATH` | 否 | `./data/pushrelay.db` | SQLite 文件路径 |
-| `WEB_ORIGIN` | 否 | `http://localhost:5173` | 浏览器访问 Origin，用于 CORS 与 CSRF 校验 |
+| `WEB_ORIGIN` | 否 | `http://localhost:5173` | 浏览器公开访问地址，用于 CORS、CSRF 与 Pocket ID 登录返回 |
 | `SETUP_TOKEN` | 否 | 自动生成 | 可选的固定初始化 Token |
 | `WORKER_CONCURRENCY` | 否 | `8` | 后台投递 Worker 数量，范围 1–64 |
 | `TRUSTED_PROXY_CIDRS` | 否 | 空 | 预留的可信代理 CIDR 列表 |

@@ -110,6 +110,61 @@ func TestPocketIDIssuerNormalization(t *testing.T) {
 	}
 }
 
+func TestRequestOriginAllowedBehindReverseProxy(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPut, "http://pushrelay:4426/api/v1/settings", nil)
+	req.Host = "push.example.com"
+	req.Header.Set("X-Forwarded-Proto", "https")
+	req.Header.Set("X-Forwarded-Host", "push.example.com")
+	req.Header.Set("Origin", "https://push.example.com")
+
+	if !requestOriginAllowed(req, "http://localhost:5173") {
+		t.Fatal("public reverse-proxy origin was rejected")
+	}
+	if got := requestBaseURL(req); got != "https://push.example.com" {
+		t.Fatalf("requestBaseURL() = %q", got)
+	}
+
+	req.Header.Set("Origin", "https://evil.example.com")
+	if requestOriginAllowed(req, "http://localhost:5173") {
+		t.Fatal("unrelated origin was accepted")
+	}
+}
+
+func TestForwardedHostDoesNotExpandAllowedOrigins(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPut, "http://pushrelay:4426/api/v1/settings", nil)
+	req.Host = "pushrelay:4426"
+	req.Header.Set("X-Forwarded-Proto", "https")
+	req.Header.Set("X-Forwarded-Host", "evil.example.com")
+	req.Header.Set("Origin", "https://evil.example.com")
+	if requestOriginAllowed(req, "https://push.example.com") {
+		t.Fatal("X-Forwarded-Host unexpectedly expanded the CSRF origin allowlist")
+	}
+}
+
+func TestRequestOriginAllowsConfiguredDevelopmentFrontend(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPut, "http://127.0.0.1:4426/api/v1/settings", nil)
+	req.Header.Set("Origin", "http://localhost:5173")
+	if !requestOriginAllowed(req, "http://localhost:5173") {
+		t.Fatal("configured development origin was rejected")
+	}
+}
+
+func TestNormalizeOriginRejectsPathsAndNonHTTPProtocols(t *testing.T) {
+	for _, value := range []string{"https://example.com/path", "javascript:alert(1)", "https://user@example.com"} {
+		if got := normalizeOrigin(value); got != "" {
+			t.Fatalf("normalizeOrigin(%q) = %q, want empty", value, got)
+		}
+	}
+}
+
+func TestRequestOriginRejectsMalformedOrigin(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPut, "http://example.test/api/v1/settings", nil)
+	req.Header.Set("Origin", "null")
+	if requestOriginAllowed(req, "http://example.test") {
+		t.Fatal("malformed Origin header was accepted")
+	}
+}
+
 func requestJSON(t *testing.T, handler http.Handler, method, path string, body any, cookie *http.Cookie, csrf string) *httptest.ResponseRecorder {
 	t.Helper()
 	encoded, err := json.Marshal(body)

@@ -168,7 +168,7 @@ func (s *Server) accessLog(next http.Handler) http.Handler {
 }
 func (s *Server) cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if origin := r.Header.Get("Origin"); origin != "" && origin == s.cfg.WebOrigin {
+		if origin := r.Header.Get("Origin"); origin != "" && requestOriginAllowed(r, s.cfg.WebOrigin) {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Vary", "Origin")
@@ -224,7 +224,7 @@ func (s *Server) requireCSRF(next http.HandlerFunc) http.HandlerFunc {
 			writeError(w, 403, "csrf_failed", "missing or invalid CSRF token", nil, r)
 			return
 		}
-		if origin := r.Header.Get("Origin"); origin != "" && origin != s.cfg.WebOrigin {
+		if !requestOriginAllowed(r, s.cfg.WebOrigin) {
 			writeError(w, 403, "origin_rejected", "request origin is not allowed", nil, r)
 			return
 		}
